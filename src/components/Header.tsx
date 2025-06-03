@@ -21,6 +21,9 @@ const Header = () => {
               Book Tickets
             </a>
             <a href="#" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+              PNR Status
+            </a>
+            <a href="#" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Train Status
             </a>
             <a href="#" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
