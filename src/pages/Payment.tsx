@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { CreditCard, Shield, Clock } from "lucide-react";
+import { CreditCard, Shield, Clock, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,23 @@ const Payment = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { trainId } = useParams();
-  const { selectedSeats, totalPrice } = location.state || { selectedSeats: [], totalPrice: 0 };
+  const { 
+    searchData, 
+    passengerDetails, 
+    selectedTrain, 
+    seatClass, 
+    selectedSeats, 
+    totalPrice, 
+    price 
+  } = location.state || { 
+    selectedSeats: [], 
+    totalPrice: 0, 
+    searchData: {}, 
+    passengerDetails: [],
+    selectedTrain: {},
+    seatClass: "",
+    price: 0
+  };
 
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [cardDetails, setCardDetails] = useState({
@@ -22,19 +38,35 @@ const Payment = () => {
     cvv: "",
     name: ""
   });
+  const [upiId, setUpiId] = useState("");
 
   const handlePayment = () => {
     // Simulate payment processing
     setTimeout(() => {
       navigate(`/e-ticket/${trainId}`, { 
         state: { 
+          searchData,
+          passengerDetails,
+          selectedTrain,
+          seatClass,
           selectedSeats, 
-          totalPrice,
+          totalPrice: Math.round(totalPrice * 1.1),
           bookingId: "TKT" + Date.now(),
-          pnr: "PNR" + Math.random().toString().substr(2, 6)
+          pnr: "PNR" + Math.random().toString().substr(2, 6),
+          price
         } 
       });
     }, 2000);
+  };
+
+  const getSeatClassName = (seatClass: string) => {
+    switch (seatClass) {
+      case "1st-ac": return "1st AC";
+      case "2nd-ac": return "2nd AC";
+      case "3rd-ac": return "3rd AC";
+      case "general": return "General";
+      default: return seatClass;
+    }
   };
 
   return (
@@ -43,7 +75,9 @@ const Payment = () => {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Details</h1>
-          <p className="text-gray-600">Complete your booking for Rajdhani Express</p>
+          <p className="text-gray-600">
+            Complete your booking for {selectedTrain?.name} • {searchData?.from} → {searchData?.to}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -128,6 +162,31 @@ const Payment = () => {
                   </div>
                 )}
 
+                {paymentMethod === "upi" && (
+                  <div className="mt-6 space-y-6">
+                    <div>
+                      <Label htmlFor="upiId">UPI ID (Optional)</Label>
+                      <Input
+                        id="upiId"
+                        placeholder="yourname@paytm"
+                        value={upiId}
+                        onChange={(e) => setUpiId(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="inline-block p-4 bg-white border-2 border-gray-300 rounded-lg">
+                        <QrCode className="h-32 w-32 text-gray-400 mx-auto" />
+                        <p className="text-sm text-gray-600 mt-2">Scan QR Code to Pay</p>
+                        <p className="text-xs text-gray-500">₹{Math.round(totalPrice * 1.1).toLocaleString()}</p>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-4">
+                        Use any UPI app to scan and pay
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                   <div className="flex items-center space-x-2 text-blue-700">
                     <Shield className="h-5 w-5" />
@@ -151,17 +210,29 @@ const Payment = () => {
                 <div className="space-y-4">
                   <div>
                     <h4 className="font-medium text-gray-900">Train Details</h4>
-                    <p className="text-sm text-gray-600">Rajdhani Express (12001)</p>
-                    <p className="text-sm text-gray-600">New Delhi → Mumbai</p>
+                    <p className="text-sm text-gray-600">{selectedTrain?.name} ({selectedTrain?.number})</p>
+                    <p className="text-sm text-gray-600">{searchData?.from} → {searchData?.to}</p>
+                    <p className="text-sm text-gray-600">{getSeatClassName(seatClass)}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-gray-900">Passengers</h4>
+                    <div className="mt-2 space-y-1">
+                      {passengerDetails?.map((passenger: any, index: number) => (
+                        <div key={index} className="text-sm text-gray-600">
+                          {passenger.name}, {passenger.age} years
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <div>
                     <h4 className="font-medium text-gray-900">Selected Seats</h4>
                     <div className="mt-2 space-y-1">
-                      {selectedSeats.map((seatId: string) => (
+                      {selectedSeats?.map((seatId: string) => (
                         <div key={seatId} className="flex justify-between text-sm">
                           <span>Seat {seatId}</span>
-                          <span>₹1,250</span>
+                          <span>₹{price}</span>
                         </div>
                       ))}
                     </div>
@@ -170,15 +241,15 @@ const Payment = () => {
                   <div className="border-t pt-4">
                     <div className="flex justify-between text-sm">
                       <span>Base Fare</span>
-                      <span>₹{totalPrice.toLocaleString()}</span>
+                      <span>₹{totalPrice?.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Taxes & Fees</span>
-                      <span>₹{Math.round(totalPrice * 0.1).toLocaleString()}</span>
+                      <span>₹{Math.round(totalPrice * 0.1)?.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between font-bold text-lg mt-2">
                       <span>Total Amount</span>
-                      <span>₹{Math.round(totalPrice * 1.1).toLocaleString()}</span>
+                      <span>₹{Math.round(totalPrice * 1.1)?.toLocaleString()}</span>
                     </div>
                   </div>
 
@@ -191,7 +262,7 @@ const Payment = () => {
                     onClick={handlePayment}
                     className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
                   >
-                    Pay ₹{Math.round(totalPrice * 1.1).toLocaleString()}
+                    Pay ₹{Math.round(totalPrice * 1.1)?.toLocaleString()}
                   </Button>
                 </div>
               </CardContent>
