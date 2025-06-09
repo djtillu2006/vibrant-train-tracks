@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 const ETicket = () => {
   const location = useLocation();
   const { trainId } = useParams();
-  const { selectedSeats, totalPrice, bookingId, pnr } = location.state || {};
+  const { selectedSeats = [], totalPrice = 0, bookingId = "TKT12345", pnr = "PNR123456", passengerDetails = [] } = location.state || {};
 
   const ticketData = {
     trainName: "Rajdhani Express",
@@ -21,6 +21,21 @@ const ETicket = () => {
     coach: "A1",
     class: "AC 2-Tier"
   };
+
+  // If no booking data, show default message
+  if (!location.state) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">No Ticket Found</h1>
+            <p className="text-gray-600">Please complete the booking process to view your e-ticket.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,18 +88,39 @@ const ETicket = () => {
               <div>
                 <h3 className="font-bold text-gray-900 mb-2">Passenger Details</h3>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Name:</span>
-                    <span className="font-medium">John Doe</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Age:</span>
-                    <span className="font-medium">32</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Gender:</span>
-                    <span className="font-medium">Male</span>
-                  </div>
+                  {passengerDetails.length > 0 ? (
+                    passengerDetails.map((passenger: any, index: number) => (
+                      <div key={index} className="space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Name:</span>
+                          <span className="font-medium">{passenger.name}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Age:</span>
+                          <span className="font-medium">{passenger.age}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Gender:</span>
+                          <span className="font-medium">{passenger.gender}</span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Name:</span>
+                        <span className="font-medium">John Doe</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Age:</span>
+                        <span className="font-medium">32</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Gender:</span>
+                        <span className="font-medium">Male</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -135,13 +171,21 @@ const ETicket = () => {
             <div className="border-t pt-6">
               <h3 className="font-bold text-gray-900 mb-4">Seat Details</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {selectedSeats.map((seatId: string) => (
-                  <div key={seatId} className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="font-bold text-blue-600 text-lg">{seatId}</div>
+                {selectedSeats.length > 0 ? (
+                  selectedSeats.map((seatId: string) => (
+                    <div key={seatId} className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="font-bold text-blue-600 text-lg">{seatId}</div>
+                      <div className="text-sm text-gray-600">{ticketData.class}</div>
+                      <div className="text-sm text-gray-600">Coach {ticketData.coach}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="font-bold text-blue-600 text-lg">1A</div>
                     <div className="text-sm text-gray-600">{ticketData.class}</div>
                     <div className="text-sm text-gray-600">Coach {ticketData.coach}</div>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </CardContent>
