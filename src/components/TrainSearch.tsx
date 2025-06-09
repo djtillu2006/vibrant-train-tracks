@@ -1,12 +1,13 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, ArrowRight, Calendar, Users, Clock, User, CreditCard } from "lucide-react";
+import { Search, ArrowRight, Calendar, Users, Clock, User, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import AadhaarVerification from "./AadhaarVerification";
 
 const TrainSearch = () => {
   const navigate = useNavigate();
@@ -21,6 +22,9 @@ const TrainSearch = () => {
   const [passengerDetails, setPassengerDetails] = useState([
     { name: "", age: "", gender: "male", idProof: "", idNumber: "" }
   ]);
+
+  const [showAadhaarVerification, setShowAadhaarVerification] = useState(false);
+  const [aadhaarVerified, setAadhaarVerified] = useState(false);
 
   const handlePassengerCountChange = (count: string) => {
     const numPassengers = parseInt(count);
@@ -56,7 +60,20 @@ const TrainSearch = () => {
       return;
     }
 
+    // Check if Tatkal booking requires Aadhaar verification
+    if (searchData.bookingType === "tatkal" && !aadhaarVerified) {
+      setShowAadhaarVerification(true);
+      return;
+    }
+
     console.log("Searching trains with:", { searchData, passengerDetails });
+    navigate("/train-results", { state: { searchData, passengerDetails } });
+  };
+
+  const handleAadhaarVerificationSuccess = () => {
+    setAadhaarVerified(true);
+    setShowAadhaarVerification(false);
+    // Proceed with search after verification
     navigate("/train-results", { state: { searchData, passengerDetails } });
   };
 
@@ -143,6 +160,30 @@ const TrainSearch = () => {
                   </div>
                 </div>
               </RadioGroup>
+              
+              {searchData.bookingType === "tatkal" && (
+                <Alert className="mt-4">
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">Tatkal Booking Times:</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-blue-600" />
+                          <span><strong>AC Classes:</strong> 10:00 AM</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-green-600" />
+                          <span><strong>Non-AC Classes:</strong> 11:00 AM</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-orange-600">
+                        * Aadhaar verification required for Tatkal bookings
+                      </p>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
 
             {/* Passenger Details */}
@@ -239,6 +280,14 @@ const TrainSearch = () => {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Aadhaar Verification Modal */}
+      {showAadhaarVerification && (
+        <AadhaarVerification 
+          onVerificationSuccess={handleAadhaarVerificationSuccess}
+          onCancel={() => setShowAadhaarVerification(false)}
+        />
+      )}
     </div>
   );
 };
