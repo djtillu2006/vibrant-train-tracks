@@ -1,13 +1,13 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, ArrowRight, Calendar, Users, Clock, User, Info } from "lucide-react";
+import { Search, ArrowRight, Calendar, Users, Clock, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import AadhaarVerification from "./AadhaarVerification";
 
 const TrainSearch = () => {
   const navigate = useNavigate();
@@ -19,69 +19,20 @@ const TrainSearch = () => {
     bookingType: "regular"
   });
 
-  const [passengerDetails, setPassengerDetails] = useState([
-    { name: "", age: "", gender: "male", idProof: "", idNumber: "" }
-  ]);
-
-  const [showAadhaarVerification, setShowAadhaarVerification] = useState(false);
-  const [aadhaarVerified, setAadhaarVerified] = useState(false);
-
-  const handlePassengerCountChange = (count: string) => {
-    const numPassengers = parseInt(count);
-    const newPassengers = [...passengerDetails];
-    
-    if (numPassengers > passengerDetails.length) {
-      for (let i = passengerDetails.length; i < numPassengers; i++) {
-        newPassengers.push({ name: "", age: "", gender: "male", idProof: "", idNumber: "" });
-      }
-    } else {
-      newPassengers.splice(numPassengers);
-    }
-    
-    setPassengerDetails(newPassengers);
-    setSearchData({...searchData, passengers: count});
-  };
-
-  const handlePassengerChange = (index: number, field: string, value: string) => {
-    const newPassengers = [...passengerDetails];
-    newPassengers[index] = { ...newPassengers[index], [field]: value };
-    setPassengerDetails(newPassengers);
-  };
-
   const handleSearch = () => {
     if (!searchData.from || !searchData.to || !searchData.date) {
       alert("Please fill in all travel details");
       return;
     }
 
-    const hasIncompletePassenger = passengerDetails.some(p => !p.name || !p.age || !p.idProof || !p.idNumber);
-    if (hasIncompletePassenger) {
-      alert("Please fill in all passenger details");
-      return;
-    }
-
-    // Check if Tatkal booking requires Aadhaar verification
-    if (searchData.bookingType === "tatkal" && !aadhaarVerified) {
-      setShowAadhaarVerification(true);
-      return;
-    }
-
-    console.log("Navigating to train-results with:", { searchData, passengerDetails });
+    console.log("Navigating to passenger-details with:", searchData);
     
-    // Navigate directly to train results with all the data
-    navigate("/train-results", { 
+    // Navigate to passenger details page first
+    navigate("/passenger-details", { 
       state: { 
-        searchData, 
-        passengerDetails 
+        searchData 
       } 
     });
-  };
-
-  const handleAadhaarVerificationSuccess = () => {
-    setAadhaarVerified(true);
-    setShowAadhaarVerification(false);
-    // Proceed with search after verification
-    navigate("/train-results", { state: { searchData, passengerDetails } });
   };
 
   return (
@@ -139,7 +90,7 @@ const TrainSearch = () => {
                 <div className="relative">
                   <select
                     value={searchData.passengers}
-                    onChange={(e) => handlePassengerCountChange(e.target.value)}
+                    onChange={(e) => setSearchData({...searchData, passengers: e.target.value})}
                     className="w-full h-12 border-2 border-gray-200 focus:border-blue-500 rounded-md px-3 transition-colors appearance-none bg-white"
                   >
                     <option value="1">1 Passenger</option>
@@ -184,94 +135,10 @@ const TrainSearch = () => {
                           <span><strong>Non-AC Classes:</strong> 11:00 AM</span>
                         </div>
                       </div>
-                      <p className="text-xs text-orange-600">
-                        * Aadhaar verification required for Tatkal bookings
-                      </p>
                     </div>
                   </AlertDescription>
                 </Alert>
               )}
-            </div>
-
-            {/* Passenger Details */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <User className="h-5 w-5 mr-2" />
-                Passenger Details
-              </h3>
-              
-              {passengerDetails.map((passenger, index) => (
-                <Card key={index} className="mb-4">
-                  <CardHeader>
-                    <CardTitle className="text-base">Passenger {index + 1}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor={`name-${index}`}>Full Name</Label>
-                        <Input
-                          id={`name-${index}`}
-                          placeholder="Enter full name"
-                          value={passenger.name}
-                          onChange={(e) => handlePassengerChange(index, "name", e.target.value)}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor={`age-${index}`}>Age</Label>
-                        <Input
-                          id={`age-${index}`}
-                          type="number"
-                          placeholder="Age"
-                          value={passenger.age}
-                          onChange={(e) => handlePassengerChange(index, "age", e.target.value)}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor={`gender-${index}`}>Gender</Label>
-                        <select
-                          id={`gender-${index}`}
-                          value={passenger.gender}
-                          onChange={(e) => handlePassengerChange(index, "gender", e.target.value)}
-                          className="w-full h-10 border border-gray-300 rounded-md px-3 bg-white"
-                        >
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor={`idProof-${index}`}>ID Proof Type</Label>
-                        <select
-                          id={`idProof-${index}`}
-                          value={passenger.idProof}
-                          onChange={(e) => handlePassengerChange(index, "idProof", e.target.value)}
-                          className="w-full h-10 border border-gray-300 rounded-md px-3 bg-white"
-                        >
-                          <option value="">Select ID Proof</option>
-                          <option value="aadhar">Aadhar Card</option>
-                          <option value="pan">PAN Card</option>
-                          <option value="passport">Passport</option>
-                          <option value="driving-license">Driving License</option>
-                          <option value="voter-id">Voter ID</option>
-                        </select>
-                      </div>
-                      
-                      <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor={`idNumber-${index}`}>ID Number</Label>
-                        <Input
-                          id={`idNumber-${index}`}
-                          placeholder="Enter ID number"
-                          value={passenger.idNumber}
-                          onChange={(e) => handlePassengerChange(index, "idNumber", e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
             </div>
             
             <div className="text-center">
@@ -287,14 +154,6 @@ const TrainSearch = () => {
           </CardContent>
         </Card>
       </div>
-      
-      {/* Aadhaar Verification Modal */}
-      {showAadhaarVerification && (
-        <AadhaarVerification 
-          onVerificationSuccess={handleAadhaarVerificationSuccess}
-          onCancel={() => setShowAadhaarVerification(false)}
-        />
-      )}
     </div>
   );
 };

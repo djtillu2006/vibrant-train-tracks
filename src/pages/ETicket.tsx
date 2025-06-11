@@ -8,19 +8,40 @@ import Header from "@/components/Header";
 const ETicket = () => {
   const location = useLocation();
   const { trainId } = useParams();
-  const { selectedSeats = [], totalPrice = 0, bookingId = "TKT12345", pnr = "PNR123456", passengerDetails = [] } = location.state || {};
+  const { 
+    selectedSeats = [], 
+    totalPrice = 0, 
+    bookingId = "TKT12345", 
+    pnr = "PNR123456", 
+    passengerDetails = [],
+    searchData = {},
+    selectedTrain = {},
+    seatClass = ""
+  } = location.state || {};
 
-  const ticketData = {
-    trainName: "Rajdhani Express",
-    trainNumber: "12001",
-    from: "New Delhi (NDLS)",
-    to: "Mumbai Central (BCT)",
-    date: "15 Dec 2024",
-    departure: "06:00",
-    arrival: "14:30",
+  // Use actual search data for journey details
+  const journeyDetails = {
+    trainName: selectedTrain.name || "Rajdhani Express",
+    trainNumber: selectedTrain.number || "12001",
+    from: searchData.from || "New Delhi (NDLS)",
+    to: searchData.to || "Mumbai Central (BCT)",
+    date: searchData.date || "15 Dec 2024",
+    departure: selectedTrain.departure || "06:00",
+    arrival: selectedTrain.arrival || "14:30",
+    duration: selectedTrain.duration || "8h 30m",
     coach: "A1",
-    class: "AC 2-Tier"
+    class: getSeatClassName(seatClass)
   };
+
+  function getSeatClassName(seatClass: string) {
+    switch (seatClass) {
+      case "1st-ac": return "1st AC";
+      case "2nd-ac": return "2nd AC";
+      case "3rd-ac": return "3rd AC";
+      case "general": return "General";
+      default: return "AC 2-Tier";
+    }
+  }
 
   // If no booking data, show default message
   if (!location.state) {
@@ -82,6 +103,10 @@ const ETicket = () => {
                     <span className="text-gray-600">Total Amount:</span>
                     <span className="font-medium">₹{Math.round(totalPrice * 1.1).toLocaleString()}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Booking Type:</span>
+                    <span className="font-medium">{searchData.bookingType === 'tatkal' ? 'Tatkal' : 'Regular'}</span>
+                  </div>
                 </div>
               </div>
 
@@ -90,18 +115,14 @@ const ETicket = () => {
                 <div className="space-y-2 text-sm">
                   {passengerDetails.length > 0 ? (
                     passengerDetails.map((passenger: any, index: number) => (
-                      <div key={index} className="space-y-1">
+                      <div key={index} className="border-b border-gray-100 pb-2 last:border-b-0">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Name:</span>
                           <span className="font-medium">{passenger.name}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Age:</span>
-                          <span className="font-medium">{passenger.age}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Gender:</span>
-                          <span className="font-medium">{passenger.gender}</span>
+                          <span className="text-gray-600">Age/Gender:</span>
+                          <span className="font-medium">{passenger.age}/{passenger.gender}</span>
                         </div>
                       </div>
                     ))
@@ -133,15 +154,15 @@ const ETicket = () => {
                   <div className="flex items-center space-x-3">
                     <Train className="h-5 w-5 text-blue-600" />
                     <div>
-                      <div className="font-medium">{ticketData.trainName}</div>
-                      <div className="text-sm text-gray-600">#{ticketData.trainNumber}</div>
+                      <div className="font-medium">{journeyDetails.trainName}</div>
+                      <div className="text-sm text-gray-600">#{journeyDetails.trainNumber}</div>
                     </div>
                   </div>
                   
                   <div className="flex items-center space-x-3">
                     <Calendar className="h-5 w-5 text-blue-600" />
                     <div>
-                      <div className="font-medium">{ticketData.date}</div>
+                      <div className="font-medium">{journeyDetails.date}</div>
                       <div className="text-sm text-gray-600">Travel Date</div>
                     </div>
                   </div>
@@ -151,16 +172,16 @@ const ETicket = () => {
                   <div className="flex items-center space-x-3">
                     <Clock className="h-5 w-5 text-blue-600" />
                     <div>
-                      <div className="font-medium">{ticketData.departure} - {ticketData.arrival}</div>
-                      <div className="text-sm text-gray-600">Duration: 8h 30m</div>
+                      <div className="font-medium">{journeyDetails.departure} - {journeyDetails.arrival}</div>
+                      <div className="text-sm text-gray-600">Duration: {journeyDetails.duration}</div>
                     </div>
                   </div>
                   
                   <div className="flex items-center space-x-3">
                     <MapPin className="h-5 w-5 text-blue-600" />
                     <div>
-                      <div className="font-medium">{ticketData.from}</div>
-                      <div className="text-sm text-gray-600">to {ticketData.to}</div>
+                      <div className="font-medium">{journeyDetails.from}</div>
+                      <div className="text-sm text-gray-600">to {journeyDetails.to}</div>
                     </div>
                   </div>
                 </div>
@@ -175,15 +196,15 @@ const ETicket = () => {
                   selectedSeats.map((seatId: string) => (
                     <div key={seatId} className="text-center p-4 bg-blue-50 rounded-lg">
                       <div className="font-bold text-blue-600 text-lg">{seatId}</div>
-                      <div className="text-sm text-gray-600">{ticketData.class}</div>
-                      <div className="text-sm text-gray-600">Coach {ticketData.coach}</div>
+                      <div className="text-sm text-gray-600">{journeyDetails.class}</div>
+                      <div className="text-sm text-gray-600">Coach {journeyDetails.coach}</div>
                     </div>
                   ))
                 ) : (
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
                     <div className="font-bold text-blue-600 text-lg">1A</div>
-                    <div className="text-sm text-gray-600">{ticketData.class}</div>
-                    <div className="text-sm text-gray-600">Coach {ticketData.coach}</div>
+                    <div className="text-sm text-gray-600">{journeyDetails.class}</div>
+                    <div className="text-sm text-gray-600">Coach {journeyDetails.coach}</div>
                   </div>
                 )}
               </div>

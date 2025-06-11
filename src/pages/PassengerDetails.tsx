@@ -21,9 +21,21 @@ const PassengerDetails = () => {
   const location = useLocation();
   const { searchData } = location.state || {};
   
-  const [passengers, setPassengers] = useState<Passenger[]>([
-    { name: "", age: "", gender: "", idProof: "" }
-  ]);
+  // If no search data, redirect to home
+  if (!searchData) {
+    navigate("/");
+    return null;
+  }
+
+  const passengerCount = parseInt(searchData.passengers || "1");
+  const [passengers, setPassengers] = useState<Passenger[]>(
+    Array.from({ length: passengerCount }, () => ({ 
+      name: "", 
+      age: "", 
+      gender: "", 
+      idProof: "" 
+    }))
+  );
 
   const addPassenger = () => {
     setPassengers([...passengers, { name: "", age: "", gender: "", idProof: "" }]);
@@ -51,7 +63,7 @@ const PassengerDetails = () => {
 
     navigate("/train-results", {
       state: {
-        ...searchData,
+        searchData,
         passengerDetails: validPassengers
       }
     });
@@ -63,7 +75,9 @@ const PassengerDetails = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Passenger Details</h1>
-          <p className="text-gray-600">Please provide passenger information for booking</p>
+          <p className="text-gray-600">
+            {searchData.from} → {searchData.to} • {searchData.date} • {searchData.passengers} Passenger{parseInt(searchData.passengers) > 1 ? 's' : ''}
+          </p>
         </div>
 
         <Card className="animate-fade-in">
@@ -154,8 +168,8 @@ const PassengerDetails = () => {
             </Button>
             
             <div className="flex justify-between pt-6">
-              <Button variant="outline" onClick={() => navigate(-1)}>
-                Back
+              <Button variant="outline" onClick={() => navigate("/")}>
+                Back to Search
               </Button>
               <Button
                 onClick={handleContinue}
