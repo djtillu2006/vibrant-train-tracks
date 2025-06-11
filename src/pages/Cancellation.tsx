@@ -157,7 +157,7 @@ const Cancellation = () => {
                       <div className="flex items-center space-x-3">
                         <Checkbox
                           checked={selectedPassengers.includes(passenger.id)}
-                          onCheckedChange={(checked) => handlePassengerSelection(passenger.id, checked as boolean)}
+                          onCheckedChange={(checked) => handlePassengerSelection(passenger.id, checked === true)}
                         />
                         <div>
                           <div className="font-medium">{passenger.name}</div>
@@ -193,7 +193,7 @@ const Cancellation = () => {
               <div className="flex items-center space-x-2 mb-6">
                 <Checkbox
                   checked={confirmCancel}
-                  onCheckedChange={setConfirmCancel}
+                  onCheckedChange={(checked) => setConfirmCancel(checked === true)}
                 />
                 <label className="text-sm text-gray-600">
                   I confirm that I want to cancel the selected tickets and understand the refund policy
