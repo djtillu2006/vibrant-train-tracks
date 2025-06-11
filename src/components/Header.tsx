@@ -21,9 +21,9 @@ const Header = () => {
             <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Book Tickets
             </Link>
-            <a href="#" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+            <Link to="/pnr-status" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               PNR Status
-            </a>
+            </Link>
             <Link to="/train-status" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Train Status
             </Link>
@@ -33,13 +33,17 @@ const Header = () => {
           </nav>
           
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="hidden md:flex">
-              <User className="h-4 w-4 mr-2" />
-              Login
-            </Button>
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-              Sign Up
-            </Button>
+            <Link to="/login">
+              <Button variant="ghost" size="sm" className="hidden md:flex">
+                <User className="h-4 w-4 mr-2" />
+                Login
+              </Button>
+            </Link>
+            <Link to="/signup">
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                Sign Up
+              </Button>
+            </Link>
             <Button variant="ghost" size="sm" className="md:hidden">
               <Menu className="h-5 w-5" />
             </Button>

@@ -66,8 +66,27 @@ const TrainSearch = () => {
       return;
     }
 
-    console.log("Searching trains with:", { searchData, passengerDetails });
-    navigate("/train-results", { state: { searchData, passengerDetails } });
+    const { from, to, date, passengers, bookingType } = searchData;
+    const departureDate = new Date(date);
+    const returnDate = new Date(date);
+    const travelClass = "AC";
+    const isTatkal = bookingType === "tatkal";
+    const isReturn = false;
+
+    navigate("/passenger-details", {
+      state: {
+        searchData: {
+          from,
+          to,
+          departureDate,
+          returnDate,
+          passengers,
+          travelClass,
+          isTatkal,
+          isReturn
+        }
+      }
+    });
   };
 
   const handleAadhaarVerificationSuccess = () => {

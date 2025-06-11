@@ -1,5 +1,6 @@
 
 import { Train, Facebook, Twitter, Instagram, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -27,10 +28,10 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Book Tickets</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Train Status</a></li>
+              <li><Link to="/" className="hover:text-white transition-colors">Book Tickets</Link></li>
+              <li><Link to="/train-status" className="hover:text-white transition-colors">Train Status</Link></li>
               <li><a href="#" className="hover:text-white transition-colors">My Bookings</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Cancellation</a></li>
+              <li><Link to="/cancellation" className="hover:text-white transition-colors">Cancellation</Link></li>
             </ul>
           </div>
           
