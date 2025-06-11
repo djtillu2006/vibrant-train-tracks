@@ -66,26 +66,14 @@ const TrainSearch = () => {
       return;
     }
 
-    const { from, to, date, passengers, bookingType } = searchData;
-    const departureDate = new Date(date);
-    const returnDate = new Date(date);
-    const travelClass = "AC";
-    const isTatkal = bookingType === "tatkal";
-    const isReturn = false;
-
-    navigate("/passenger-details", {
-      state: {
-        searchData: {
-          from,
-          to,
-          departureDate,
-          returnDate,
-          passengers,
-          travelClass,
-          isTatkal,
-          isReturn
-        }
-      }
+    console.log("Navigating to train-results with:", { searchData, passengerDetails });
+    
+    // Navigate directly to train results with all the data
+    navigate("/train-results", { 
+      state: { 
+        searchData, 
+        passengerDetails 
+      } 
     });
   };
 

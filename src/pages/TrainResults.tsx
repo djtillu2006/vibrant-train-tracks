@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Clock, MapPin, Train, Users, Wifi, Coffee, ChevronRight } from "lucide-react";
@@ -32,10 +31,27 @@ interface TrainData {
 const TrainResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { searchData, passengerDetails } = location.state || { 
-    searchData: { from: "New Delhi", to: "Mumbai", passengers: "1" }, 
-    passengerDetails: [] 
+  
+  // Handle case where state might be undefined
+  const stateData = location.state || {};
+  const searchData = stateData.searchData || { 
+    from: "New Delhi", 
+    to: "Mumbai", 
+    passengers: "1",
+    date: new Date().toISOString().split('T')[0],
+    bookingType: "regular"
   };
+  const passengerDetails = stateData.passengerDetails || [];
+
+  console.log("TrainResults - location.state:", location.state);
+  console.log("TrainResults - searchData:", searchData);
+
+  // If no valid data, redirect to home
+  if (!location.state || !location.state.searchData) {
+    console.log("No search data found, redirecting to home");
+    navigate("/");
+    return null;
+  }
 
   const [trains] = useState<TrainData[]>([
     {
