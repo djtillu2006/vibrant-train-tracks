@@ -31,8 +31,8 @@ const App = () => (
           <Route path="/signup" element={<SignUp />} />
           <Route path="/passenger-details" element={<PassengerDetails />} />
           <Route path="/train-results" element={<TrainResults />} />
-          <Route path="/seat-selection/:trainId" element={<SeatSelection />} />
           <Route path="/payment/:trainId" element={<Payment />} />
+          <Route path="/seat-selection/:trainId" element={<SeatSelection />} />
           <Route path="/e-ticket/:trainId" element={<ETicket />} />
           <Route path="/train-status" element={<TrainStatus />} />
           <Route path="/pnr-status" element={<PNRStatus />} />

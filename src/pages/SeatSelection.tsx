@@ -18,7 +18,7 @@ const SeatSelection = () => {
   const navigate = useNavigate();
   const { trainId } = useParams();
   const location = useLocation();
-  const { searchData, passengerDetails, selectedTrain, seatClass, price } = location.state || {};
+  const { searchData, passengerDetails, selectedTrain, seatClass, price, paymentConfirmed } = location.state || {};
 
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
@@ -103,7 +103,7 @@ const SeatSelection = () => {
 
   const handleConfirmSeats = () => {
     if (selectedSeats.length > 0) {
-      navigate(`/payment/${trainId}`, { 
+      navigate(`/e-ticket/${trainId}`, { 
         state: { 
           searchData,
           passengerDetails,
@@ -111,6 +111,8 @@ const SeatSelection = () => {
           seatClass,
           selectedSeats, 
           totalPrice: getTotalPrice(),
+          bookingId: "TKT" + Date.now(),
+          pnr: "PNR" + Math.random().toString().substr(2, 6),
           price
         } 
       });
@@ -129,6 +131,11 @@ const SeatSelection = () => {
             </h1>
             <Sparkles className="h-8 w-8 text-purple-600 animate-spin" />
           </div>
+          {paymentConfirmed && (
+            <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded-lg mb-4 inline-block">
+              ✅ Payment Confirmed - Now select your seats
+            </div>
+          )}
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl px-6 py-4 inline-block shadow-xl border border-white/30">
             <div className="flex items-center space-x-4 text-gray-700">
               <div className="flex items-center space-x-2">
@@ -337,7 +344,7 @@ const SeatSelection = () => {
                     disabled={selectedSeats.length !== parseInt(searchData?.passengers || "1")}
                     className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl py-3 text-lg font-bold"
                   >
-                    Proceed to Payment
+                    Confirm Booking
                   </Button>
                 </div>
               </CardContent>
