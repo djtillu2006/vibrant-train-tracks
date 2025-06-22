@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}PNR Status - RailBooker{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold gradient-text">PNR Status</h1>
+        <p class="lead text-muted">Check your booking status and journey details</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-search me-2"></i>Check PNR Status</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% crispy form %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PNR Results -->
+    {% if booking %}
+    <div class="card shadow-lg border-0">
+        <div class="card-header gradient-bg text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-train me-2"></i>Booking Details
+                </h4>
+                <div class="text-end">
+                    <div>PNR</div>
+                    <div class="fs-4 fw-bold">{{ booking.pnr }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">Journey Details</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-train text-primary me-3"></i>
+                        <div>
+                            <div class="fw-bold">{{ booking.train.name }}</div>
+                            <small class="text-muted">#{{ booking.train.number }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-map-marker-alt text-primary me-3"></i>
+                        <div>
+                            <div class="fw-bold">{{ booking.route.from_station }} → {{ booking.route.to_station }}</div>
+                            <small class="text-muted">Route</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-calendar text-primary me-3"></i>
+                        <div>
+                            <div class="fw-bold">{{ booking.travel_date }}</div>
+                            <small class="text-muted">Travel Date</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock text-primary me-3"></i>
+                        <div>
+                            <div class="fw-bold">{{ booking.train.departure_time }} - {{ booking.train.arrival_time }}</div>
+                            <small class="text-muted">Timing</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">Booking Status</h5>
+                    <div class="alert alert-success">
+                        <div class="fw-bold">Status: {{ booking.get_status_display }}</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Coach:</span>
+                        <span class="fw-bold">{% if seats %}{{ seats.0.coach }}{% else %}A1{% endif %}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Seats:</span>
+                        <span class="fw-bold">
+                            {% for seat in seats %}{{ seat.seat_number }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-top pt-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-users text-primary me-2"></i>Passenger Details
+                </h5>
+                {% for passenger in passengers %}
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-2">
+                    <div>
+                        <div class="fw-bold">{{ passenger.name }}</div>
+                        <small class="text-muted">Age: {{ passenger.age }}</small>
+                    </div>
+                    <span class="badge bg-success">{{ booking.get_status_display }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

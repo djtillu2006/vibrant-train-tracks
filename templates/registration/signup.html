@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Sign Up - RailBooker{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <div class="gradient-bg d-inline-flex p-3 rounded-circle mb-3">
+                                <i class="fas fa-train text-white fa-2x"></i>
+                            </div>
+                            <h2 class="fw-bold gradient-text">Join RailBooker</h2>
+                            <p class="text-muted">Create your account to start booking</p>
+                        </div>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            {% crispy form %}
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <p class="text-muted">
+                                Already have an account? 
+                                <a href="{% url 'accounts:login' %}" class="text-decoration-none fw-bold">
+                                    Sign in
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Train Status - RailBooker{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-5">
+        <h1 class="display-5 fw-bold gradient-text">Train Status</h1>
+        <p class="lead text-muted">Track your train's live location and status</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {% crispy form %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Train Status Results -->
+    {% if train_data %}
+    <div class="row">
+        <!-- Train Info -->
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header gradient-bg text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-train me-3"></i>
+                            <div>
+                                <div class="fw-bold">{{ train_data.name }}</div>
+                                <small>#{{ train_data.number }}</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div>{{ train_data.date }}</div>
+                            <div class="fw-bold">{{ train_data.status }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-map-marker-alt text-primary me-3"></i>
+                                <div>
+                                    <div class="fw-bold">Current Location</div>
+                                    <div class="text-muted">{{ train_data.current_station }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-clock text-primary me-3"></i>
+                                <div>
+                                    <div class="fw-bold">Next Station</div>
+                                    <div class="text-muted">{{ train_data.next_station }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Station Timeline -->
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Station Timeline</h5>
+                </div>
+                <div class="card-body">
+                    {% for station in train_data.stations %}
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            {% if station.status == 'completed' %}
+                                <i class="fas fa-check-circle text-success"></i>
+                            {% elif station.status == 'current' %}
+                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                            {% else %}
+                                <i class="far fa-circle text-muted"></i>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-grow-1">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="fw-bold 
+                                        {% if station.status == 'completed' %}text-success
+                                        {% elif station.status == 'current' %}text-primary
+                                        {% else %}text-muted{% endif %}">
+                                        {{ station.name }}
+                                    </div>
+                                    <small class="text-muted">{{ station.code }}</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-muted">Arrival</div>
+                                    <div class="
+                                        {% if station.status == 'completed' %}text-success
+                                        {% elif station.status == 'current' %}text-primary
+                                        {% else %}text-muted{% endif %}">
+                                        {{ station.arrival }}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-muted">Departure</div>
+                                    <div class="
+                                        {% if station.status == 'completed' %}text-success
+                                        {% elif station.status == 'current' %}text-primary
+                                        {% else %}text-muted{% endif %}">
+                                        {{ station.departure }}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-muted">Distance</div>
+                                    <div class="
+                                        {% if station.status == 'completed' %}text-success
+                                        {% elif station.status == 'current' %}text-primary
+                                        {% else %}text-muted{% endif %}">
+                                        {{ station.distance }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if not forloop.last %}
+                    <div class="ms-2 mb-2" style="height: 20px; border-left: 2px 
+                        {% if station.status == 'completed' %}solid #28a745{% else %}dashed #dee2e6{% endif %};"></div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

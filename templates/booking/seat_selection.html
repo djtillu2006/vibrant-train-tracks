@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Seat Selection - RailBooker{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h1 class="display-6 fw-bold gradient-text">
+            <i class="fas fa-chair me-2"></i>Select Your Seats
+        </h1>
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>Payment Confirmed - Now select your seats
+        </div>
+        <div class="bg-light rounded-pill px-4 py-2 d-inline-block">
+            <strong>{{ train.name }} ({{ train.number }})</strong> • 
+            {{ search_data.from_station }} → {{ search_data.to_station }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header gradient-bg text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-train me-2"></i>Coach Layout - {{ payment_data.seat_class|title }}
+                        <span class="badge bg-light text-dark ms-2">Coach A1</span>
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Legend -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="seat available me-2">A1</div>
+                                <span>Available</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="seat occupied me-2">A1</div>
+                                <span>Occupied</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="seat selected me-2">A1</div>
+                                <span>Selected</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">🪟</span>
+                                <span>Window</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seat Layout -->
+                    <div class="bg-light p-4 rounded">
+                        <div class="text-center mb-3">
+                            <span class="badge bg-primary">← Front of Train</span>
+                        </div>
+                        
+                        <form method="post" id="seatForm">
+                            {% csrf_token %}
+                            
+                            {% for row in "12345" %}
+                            <div class="d-flex justify-content-center align-items-center mb-2">
+                                <span class="badge bg-secondary me-3">{{ row }}</span>
+                                
+                                <!-- Left side seats -->
+                                {% for letter in "ABC" %}
+                                {% for seat in seats %}
+                                {% if seat.number == row|add:letter %}
+                                <div class="seat {{ seat.status }} {% if seat.type == 'window' %}window{% endif %} me-1" 
+                                     data-seat="{{ seat.id }}" 
+                                     onclick="toggleSeat('{{ seat.id }}', '{{ seat.status }}')">
+                                    {{ letter }}
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                                
+                                <!-- Aisle -->
+                                <div class="mx-3 text-center" style="width: 60px;">
+                                    <small class="text-muted">AISLE</small>
+                                </div>
+                                
+                                <!-- Right side seats -->
+                                {% for letter in "DEF" %}
+                                {% for seat in seats %}
+                                {% if seat.number == row|add:letter %}
+                                <div class="seat {{ seat.status }} {% if seat.type == 'window' %}window{% endif %} me-1" 
+                                     data-seat="{{ seat.id }}" 
+                                     onclick="toggleSeat('{{ seat.id }}', '{{ seat.status }}')">
+                                    {{ letter }}
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                            
+                            <div class="text-center mt-3">
+                                <span class="badge bg-secondary">Back of Train →</span>
+                            </div>
+                            
+                            <input type="hidden" name="selected_seats" id="selectedSeatsInput">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Booking Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Journey Details</h6>
+                        <p class="mb-1"><i class="fas fa-route me-2"></i>{{ search_data.from_station }} → {{ search_data.to_station }}</p>
+                        <p class="mb-1"><i class="fas fa-calendar me-2"></i>{{ search_data.travel_date }}</p>
+                        <p class="mb-0"><i class="fas fa-train me-2"></i>{{ payment_data.seat_class|title }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Selected Seats</h6>
+                        <div id="selectedSeatsList">
+                            <p class="text-muted text-center">No seats selected</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+                        <span>Total Amount</span>
+                        <span id="totalAmount">₹0</span>
+                    </div>
+                    
+                    <p class="text-center text-muted mb-3">
+                        <span id="selectedCount">0</span> of {{ required_seats }} seat{{ required_seats|pluralize }} selected
+                    </p>
+
+                    <button type="button" class="btn btn-gradient w-100" onclick="confirmBooking()" id="confirmBtn" disabled>
+                        <i class="fas fa-check me-2"></i>Confirm Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedSeats = [];
+const requiredSeats = {{ required_seats }};
+const seatPrice = {{ payment_data.total_price|div:required_seats|floatformat:0 }};
+
+function toggleSeat(seatId, status) {
+    if (status === 'occupied') return;
+    
+    const seatElement = document.querySelector(`[data-seat="${seatId}"]`);
+    
+    if (selectedSeats.includes(seatId)) {
+        // Deselect seat
+        selectedSeats = selectedSeats.filter(id => id !== seatId);
+        seatElement.classList.remove('selected');
+        seatElement.classList.add('available');
+    } else {
+        // Select seat (if not at limit)
+        if (selectedSeats.length < requiredSeats) {
+            selectedSeats.push(seatId);
+            seatElement.classList.remove('available');
+            seatElement.classList.add('selected');
+        }
+    }
+    
+    updateSummary();
+}
+
+function updateSummary() {
+    const selectedCount = selectedSeats.length;
+    const totalAmount = selectedCount * seatPrice;
+    
+    document.getElementById('selectedCount').textContent = selectedCount;
+    document.getElementById('totalAmount').textContent = `₹${totalAmount.toLocaleString()}`;
+    
+    // Update selected seats list
+    const seatsList = document.getElementById('selectedSeatsList');
+    if (selectedCount > 0) {
+        seatsList.innerHTML = selectedSeats.map(seatId => 
+            `<div class="d-flex justify-content-between mb-1">
+                <span class="fw-bold text-success">Seat ${seatId}</span>
+                <span class="fw-bold text-success">₹${seatPrice}</span>
+            </div>`
+        ).join('');
+    } else {
+        seatsList.innerHTML = '<p class="text-muted text-center">No seats selected</p>';
+    }
+    
+    // Enable/disable confirm button
+    const confirmBtn = document.getElementById('confirmBtn');
+    confirmBtn.disabled = selectedCount !== requiredSeats;
+    
+    // Update hidden input
+    document.getElementById('selectedSeatsInput').value = selectedSeats.join(',');
+}
+
+function confirmBooking() {
+    if (selectedSeats.length === requiredSeats) {
+        // Update the form with selected seats
+        const form = document.getElementById('seatForm');
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'selected_seats';
+        input.value = selectedSeats;
+        form.appendChild(input);
+        
+        form.submit();
+    }
+}
+</script>
+{% endblock %}
